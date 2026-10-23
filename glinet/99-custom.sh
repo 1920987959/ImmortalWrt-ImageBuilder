@@ -112,7 +112,7 @@ if [ -f /usr/bin/quickfile ]; then
     uci del nginx._lan 2>/dev/null
     uci del nginx._redirect2ssl 2>/dev/null
     uci add nginx server
-    uci rename nginx.@server[-1]='_lan'
+    uci rename nginx.@server[0]='_lan'
     uci set nginx._lan.server_name='_lan'
     uci add_list nginx._lan.listen='80 default_server'
     uci add_list nginx._lan.listen='[::]:80 default_server'
