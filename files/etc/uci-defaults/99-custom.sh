@@ -216,4 +216,22 @@ else
     echo "未检测到 Docker，跳过防火墙配置。"
 fi
 
+# 装了 quickfile（=装了 luci-nginx）时，强制 nginx 只用 HTTP 80，
+# 去掉默认的 443+自签证书和 HTTP->HTTPS 跳转
+if [ -f /usr/bin/quickfile ]; then
+    uci set nginx.global.uci_enable='true'
+    uci del nginx._lan 2>/dev/null
+    uci del nginx._redirect2ssl 2>/dev/null
+    uci add nginx server
+    uci rename nginx.@server[-1]='_lan'
+    uci set nginx._lan.server_name='_lan'
+    uci add_list nginx._lan.listen='80 default_server'
+    uci add_list nginx._lan.listen='[::]:80 default_server'
+    uci set nginx._lan.include='conf.d/*.locations'
+    uci set nginx._lan.access_log='off; # logd openwrt'
+    uci set uhttpd.main.redirect_https='0'
+    uci commit nginx
+    uci commit uhttpd
+fi
+
 exit 0
